@@ -1,0 +1,43 @@
+version: "3.8"
+
+services:
+  vex-postgres:
+    image: postgres:alpine3.19
+    environment:
+      POSTGRES_USER: vortex
+      POSTGRES_PASSWORD: sdbsr2hE4kI1jYaficN6wz9eXvUWazZN
+      POSTGRES_DB: vortex
+    ports:
+      - "5432:5432"
+    networks:
+      - vex-network
+    restart: always
+
+  vex-redis:
+    image: redis/redis-stack-server:latest
+    environment:
+      REDIS_ARGS: "--requirepass iKCrM3TFKvmvZxm49rmAXlE4grUw58R4"
+    ports:
+      - "6379:6379"
+    networks:
+      - vex-network
+    restart: always
+
+  vex-vault:
+    image: vault:1.13.3
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: avjQoBdrJ4BVfVV7PCpWR8QayngM53LW
+    ports:
+      - "8200:8200"
+    networks:
+      - vex-network
+    depends_on:
+      - vex-redis
+      - vex-postgres
+    restart: always
+    cap_add:
+      - IPC_LOCK
+
+networks:
+  vex-network:
+    driver: bridge
