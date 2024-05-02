@@ -2,7 +2,8 @@ version: "3.8"
 
 services:
   postgres:
-    image: postgres:latest
+    container_name: vortexcore-be-postgres
+    image: postgres:16.2
     environment:
       POSTGRES_USER: ${DB_USERNAME}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
@@ -14,7 +15,8 @@ services:
     restart: always
 
   redis:
-    image: redis/redis-stack-server:latest
+    container_name: vortexcore-be-redis
+    image: redis/redis-stack-server:7.2.0-v9
     environment:
       REDIS_ARGS: "--requirepass ${REDIS_PASSWORD}"
     ports:
@@ -24,6 +26,7 @@ services:
     restart: always
 
   vault:
+    container_name: vortexcore-be-vault
     image: vault:1.13.3
     environment:
       VAULT_DEV_ROOT_TOKEN_ID: ${VAULT_TOKEN}
@@ -37,6 +40,21 @@ services:
     restart: always
     cap_add:
       - IPC_LOCK
+
+  account-svc:
+    container_name: vortexcore-be-account
+    image: dodyy14/vortex-be-account:latest
+    env_file:
+      - .env
+    ports:
+      - "3011:3011"
+    networks:
+      - vex-network
+    depends_on:
+      - redis
+      - postgres
+      - vault
+    restart: always
 
 networks:
   vex-network:
