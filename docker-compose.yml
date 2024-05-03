@@ -44,7 +44,7 @@ services:
   strapi:
     container_name: vortexcore-be-strapi
     build: .
-    image: strapi:latest
+    image: strapi/strapi:3.6.8-alpine
     restart: unless-stopped
     env_file: .env
     environment:
