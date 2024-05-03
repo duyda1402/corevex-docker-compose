@@ -1,4 +1,4 @@
-version: "3.8"
+version: "3"
 
 services:
   postgres:
@@ -12,7 +12,7 @@ services:
       - "5432:5432"
     networks:
       - vex-network
-    restart: always
+    restart: unless-stopped
 
   redis:
     container_name: vortexcore-be-redis
@@ -23,7 +23,7 @@ services:
       - "6379:6379"
     networks:
       - vex-network
-    restart: always
+    restart: unless-stopped
 
   vault:
     container_name: vortexcore-be-vault
@@ -37,15 +37,49 @@ services:
     depends_on:
       - redis
       - postgres
-    restart: always
+    restart: unless-stopped
     cap_add:
       - IPC_LOCK
+
+  strapi:
+    container_name: vortexcore-be-strapi
+    build: .
+    image: strapi:latest
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_CLIENT: ${DB_CLIENT}
+      DATABASE_HOST: postgres
+      DATABASE_PORT: ${DB_POST}
+      DATABASE_NAME: dev_strapi
+      DATABASE_USERNAME: ${DB_USERNAME}
+      DATABASE_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET}
+      APP_KEYS: ${APP_KEYS}
+      NODE_ENV: ${NODE_ENV}
+    volumes:
+      - ./config:/opt/app/config
+      - ./src:/opt/app/src
+      - ./package.json:/opt/package.json
+      - ./yarn.lock:/opt/yarn.lock
+      - ./.env:/opt/app/.env
+      - ./public/uploads:/opt/app/public/uploads
+    ports:
+      - "1337:1337"
+    networks:
+      - vex-network
+    depends_on:
+      - postgres
+      - redis
 
   account-svc:
     container_name: vortexcore-be-account
     image: dodyy14/vortex-be-account:latest
     env_file:
       - .env
+    environment:
+      DATABASE_NAME: dev_account
     ports:
       - "3011:3011"
     networks:
