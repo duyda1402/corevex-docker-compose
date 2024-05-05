@@ -1,0 +1,18 @@
+version: "3"
+
+services:
+  rabbitmq:
+    container_name: vortexcore-be-rabbitmq
+    image: rabbitmq:3.13-management
+    env_file:
+      - .env
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - vex-network
+    restart: unless-stopped
+
+networks:
+  vex-network:
+    driver: bridge
